@@ -33,12 +33,13 @@ export default (opt = {}) => {
 	return {
 		name: 'html',
 		writeBundle(config, data) {
+                        const bundle = data || config;
 			const isHTML = /^.*<html>.*<\/html>$/.test(template);
 			const $ = cheerio.load(isHTML?template:readFileSync(template).toString());
 			const head = $('head');
 			const body = $('body');
 			let entryConfig = {};
-			Object.values(config).forEach((c) => {
+			Object.values(bundle).forEach((c) => {
 				if (c.isEntry) entryConfig = c
 			})
 			const { fileName,	sourcemap } = entryConfig
