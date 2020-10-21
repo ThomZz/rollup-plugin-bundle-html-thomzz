@@ -27,12 +27,19 @@ function isURL(url) {
 	return (new RegExp('^(?:[a-z]+:)?//', 'i')).test(url);
 }
 
+function isRollupV2(options) {
+	return options.assetFileNames && options.entryFileNames;
+}
+
 export default (opt = {}) => {
 	const { template, filename, clean, externals, scriptType, inject, dest, absolute, inline, minifyCss, ignore, exclude, onlinePath } = opt;
 
 	return {
 		name: 'html',
-		writeBundle(config, data) {
+		writeBundle: function writeBundle(options, data) {
+			const { config, bundle } = isRollupV2(options) ? { config: data, bundle: data.code } :
+				{ config: options, bundle: options.code };
+
 			const isHTML = /^.*<html>.*<\/html>$/.test(template);
 			const $ = cheerio.load(isHTML?template:readFileSync(template).toString());
 			const head = $('head');
@@ -74,8 +81,8 @@ export default (opt = {}) => {
 
 				if (inline || isHash) {
 					if (file === destPath) {
-						// data.code will remove the last line of the source code(//# sourceMappingURL=xxx), so it's needed to add this
-						code = `${data.code}//# sourceMappingURL=${basename(file)}.map`;
+						// bundle will remove the last line of the source code(//# sourceMappingURL=xxx), so it's needed to add this
+						code = `${bundle}//# sourceMappingURL=${basename(file)}.map`;
 					} else {
 						code = readFileSync(file).toString();
 					}
