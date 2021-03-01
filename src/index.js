@@ -69,6 +69,8 @@ export default (opt = {}) => {
 				})
 			}
 
+			const processedFiles = [];
+			
 			fileList.forEach(node => {
 				let { type, file } = node;
 				if (ignore && file.match(ignore)) {
@@ -128,8 +130,10 @@ export default (opt = {}) => {
 					const content = inline ? `<style>\n${minifyCss ? new CleanCss().minify(code).styles : code}\n</style>\n` : style;
 					head.append(content);
 				}
+
+				processedFiles.push(node);
 			});
-			if (clean) fileList.forEach(f => unlinkSync(f.file));
+			if (clean) processedFiles.forEach(f => unlinkSync(f.file));
 			writeFileSync(destFile, $.html());
 		}
 	};
